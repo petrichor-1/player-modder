@@ -69,7 +69,7 @@ function replaceHSExecutableExecuteBlock(unmoddedPlayer) {
 		hasFoundMatch = true;
 		const oldExecuteBlocks = extractFunction(unmoddedPlayer,match.index+"e.prototype.executeBlock=".length);
 		const newBody = oldExecuteBlocks.body
-			.replace(/default:([^}]+)/,`default:executeModdedMethod((t)=>{$1},${oldExecuteBlocks.parameterNames[0]},${oldExecuteBlocks.parameterNames[1]});`)
+			.replace(/default:([^}]+)/,`default:executeModdedMethod((${oldExecuteBlocks.parameterNames[1]})=>{$1},${oldExecuteBlocks.parameterNames[0]},${oldExecuteBlocks.parameterNames[1]});`)
 			.replace(/.\.HS/g,"HS");
 		return unmoddedPlayer.substr(0,oldExecuteBlocks.bodyStartIndex)+newBody+unmoddedPlayer.substr(oldExecuteBlocks.bodyEndIndex,unmoddedPlayer.length);
 	}
