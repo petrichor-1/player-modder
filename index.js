@@ -104,6 +104,12 @@ function replaceHSStageParameterBlockTypeOfCalculation(unmoddedPlayer) {
 	);
 }
 
+function replaceHSConditionalCalculatorComputedBooleanValue(unmoddedPlayer) {
+	return replaceDefault(unmoddedPlayer,"computedBooleanValue",4,old =>
+		`default:return executeModdedParameter(()=>{$1},${old.parameterNames[0]},[${old.parameterNames[1]},${old.parameterNames[2]}],${old.parameterNames[3]})`
+	);
+}
+
 function applyModOrWriteFile(moddedPlayer,amountOfModsApplied) {
 	if (modPaths.length > amountOfModsApplied) {
 		fs.readFile(modPaths[amountOfModsApplied],(error, f) => {
@@ -129,7 +135,7 @@ fs.readFile(unmoddedPlayerPath, (error, f) => {
 		if (error)
 			return console.error(error);
 		let moddedPlayer = f.toString();
-		moddedPlayer += "\n"+replaceHSExecutableExecuteBlock(replaceHSMathCalculatorComputedValue(replaceHSStageParameterBlockTypeOfCalculation(unmoddedPlayer)));
+		moddedPlayer += "\n"+replaceHSExecutableExecuteBlock(replaceHSMathCalculatorComputedValue(replaceHSStageParameterBlockTypeOfCalculation(replaceHSConditionalCalculatorComputedBooleanValue(unmoddedPlayer))));
 		applyModOrWriteFile(moddedPlayer,0);
 	});
 });

@@ -33,10 +33,11 @@ function typeOfCalculationForModdedBlock(defaultCallback) {
 	return MODDED_PARAMETER_CALCULATION_TYPES[this.type];
 }
 
-function executeModdedParameter(defaultCallback,type,parameters) {
+function executeModdedParameter(defaultCallback,type,parameters,object) {
 	if (type >= 0)
-		return defaultCallback();
-	return MODDED_PARAMETER_BLOCKS[type].apply(this,[parameters]);
+	return defaultCallback();
+	// object is only defined on booleans
+	return MODDED_PARAMETER_BLOCKS[type].apply(this,[parameters,object]);
 }
 
 function setModConfig(config) {
