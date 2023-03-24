@@ -121,6 +121,12 @@ function replaceTraitCheck(unmoddedPlayer) {
 	 "(this.type >= $1.HSBlockType.TraitRotation && this.type < $1.HSBlockType.HS_END_OF_OBJECT_TRAITS) || (this.type<0&&MODDED_PARAMETER_CALCULATION_TYPES[this.type]==PetrichorParameterType.trait)");
 }
 
+function replaceLinePropertiesParserComputedColorString(unmoddedPlayer) {
+	return replaceDefault(unmoddedPlayer,"computedColorString",2,old =>
+		`default:return executeModdedParameter.apply(this,[()=>{$1},${old.parameterNames[0]},null,${old.parameterNames[1]}])`
+	);
+}
+
 function applyModOrWriteFile(moddedPlayer,amountOfModsApplied) {
 	if (modPaths.length > amountOfModsApplied) {
 		fs.readFile(modPaths[amountOfModsApplied],(error, f) => {
@@ -151,9 +157,10 @@ fs.readFile(unmoddedPlayerPath, (error, f) => {
 			replaceHSStageParameterBlockTypeOfCalculation(
 			replaceHSConditionalCalculatorComputedBooleanValue(
 			replaceHSTraitCalculatorComputedValue(
+			replaceLinePropertiesParserComputedColorString(
 			replaceTraitCheck(
 				unmoddedPlayer
-			))))));
+		)))))));
 		applyModOrWriteFile(moddedPlayer,0);
 	});
 });
