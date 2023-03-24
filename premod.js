@@ -1,3 +1,11 @@
+const PetrichorParameterType = { //There doesn't seem to be an enum in the vanilla player, so make a simple object to help with that.
+	conditional: "conditional",
+	trait: "trait",
+	math: "math",
+	color: "color",
+	text: "text"
+}
+
 const RESERVED_INVALID_USER_ID = 2;
 const PETRICHOR_CURRENT_MOD_CONFIG = {
 	userId: RESERVED_INVALID_USER_ID,
@@ -6,6 +14,7 @@ const PETRICHOR_CURRENT_MOD_CONFIG = {
 }
 const MODDED_METHOD_BLOCKS = {}
 const MODDED_PARAMETER_BLOCKS = {}
+const MODDED_PARAMETER_CALCULATION_TYPES = {};
 function executeModdedMethod(defaultCallback,stageMethod,t) {
 	if (stageMethod.type < 0) {
 		if (MODDED_METHOD_BLOCKS[stageMethod.type]) {
@@ -16,6 +25,19 @@ function executeModdedMethod(defaultCallback,stageMethod,t) {
 	} else {
 		defaultCallback(t);
 	}
+}
+
+function typeOfCalculationForModdedBlock(defaultCallback) {
+	console.log(this);
+	if (this.type >= 0)
+		return defaultCallback();
+	return MODDED_PARAMETER_CALCULATION_TYPES[this.type];
+}
+
+function executeModdedParameter(defaultCallback,type,parameters) {
+	if (type >= 0)
+		return defaultCallback();
+	return MODDED_PARAMETER_BLOCKS[type](parameters);
 }
 
 function setModConfig(config) {
@@ -60,5 +82,12 @@ function newBlock(blockConfig) {
 	if (blockConfig.method) {
 		console.log(`Adding new method block ${blockConfig.name} into mod ${PETRICHOR_CURRENT_MOD_CONFIG.modName}`);
 		MODDED_METHOD_BLOCKS[actualId] = blockConfig.method;
+	}
+	if (blockConfig.parameter) {
+		console.log(`Adding new parameter block ${blockConfig.name} into mod ${PETRICHOR_CURRENT_MOD_CONFIG.modName}`);
+		if (!blockConfig.parameterType)
+			throw "Parameter blocks need a parameterType. You can use PetrichorParameterType.{conditional,trait,math,color,text} for this. :D"
+		MODDED_PARAMETER_BLOCKS[actualId] = blockConfig.parameter;
+		MODDED_PARAMETER_CALCULATION_TYPES[actualId] = blockConfig.parameterType;
 	}
 }

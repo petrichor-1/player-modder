@@ -78,6 +78,43 @@ function replaceHSExecutableExecuteBlock(unmoddedPlayer) {
 	}
 }
 
+function replaceHSMathCalculatorComputedValue(unmoddedPlayer) {
+	const regex = /[a-z]\.prototype\.computedValue=function\([a-z],[a-z]\)/g
+	let hasFoundMatch = false;
+	while (match = regex.exec(unmoddedPlayer)) {
+		if (hasFoundMatch)
+			throw "Found multiple matches for computedValue when trying to modify HSMathCalculator.prototype.computedValue"
+		hasFoundMatch = true;
+		const oldComputedValue = extractFunction(unmoddedPlayer,match.index+"e.prototype.computedValue=".length);
+		//TODO: I think the first thing computedValue does is parse the
+		//      parameters as numbers. Should those values be used?
+		const newBody = oldComputedValue.body
+			.replace(/default:([^}]+)/,`default:return executeModdedParameter(()=>{$1},${oldComputedValue.parameterNames[0]},${oldComputedValue.parameterNames[1]});`)
+			.replace(/.\.HS/g,"HS");
+		return unmoddedPlayer.substr(0,oldComputedValue.bodyStartIndex)+newBody+unmoddedPlayer.substr(oldComputedValue.bodyEndIndex,unmoddedPlayer.length);
+	}
+	if (!hasFoundMatch) {
+		throw "Could not find HSMathCalculator.prototype.computedValue";
+	}
+}
+
+function replaceHSStageParameterBlockTypeOfCalculation(unmoddedPlayer) {
+	const regex = /[a-z]\.prototype\.typeOfCalculation=function\(\)/g
+	let hasFoundMatch = false;
+	while (match = regex.exec(unmoddedPlayer)) {
+		if (hasFoundMatch)
+			throw "Found multiple matches for typeOfCalculation when trying to modify HSStageParameterBlock.prototype.typeOfCalculation"
+		hasFoundMatch = true;
+		const oldTypeOfCalculation = extractFunction(unmoddedPlayer,match.index+"e.prototype.typeOfCalculation=".length);
+		const newBody = oldTypeOfCalculation.body
+			.replace(/default:([^}]+)/,`default:return typeOfCalculationForModdedBlock.apply(this,[()=>{$1}]);`)
+		return unmoddedPlayer.substr(0,oldTypeOfCalculation.bodyStartIndex)+newBody+unmoddedPlayer.substr(oldTypeOfCalculation.bodyEndIndex,unmoddedPlayer.length);
+	}
+	if (!hasFoundMatch) {
+		throw "Could not find HSStageParameterBlock.prototype.typeOfCalculation";
+	}
+}
+
 function applyModOrWriteFile(moddedPlayer,amountOfModsApplied) {
 	if (modPaths.length > amountOfModsApplied) {
 		fs.readFile(modPaths[amountOfModsApplied],(error, f) => {
@@ -103,7 +140,7 @@ fs.readFile(unmoddedPlayerPath, (error, f) => {
 		if (error)
 			return console.error(error);
 		let moddedPlayer = f.toString();
-		moddedPlayer += "\n"+replaceHSExecutableExecuteBlock(unmoddedPlayer);
+		moddedPlayer += "\n"+replaceHSExecutableExecuteBlock(replaceHSMathCalculatorComputedValue(replaceHSStageParameterBlockTypeOfCalculation(unmoddedPlayer)));
 		applyModOrWriteFile(moddedPlayer,0);
 	});
 });
