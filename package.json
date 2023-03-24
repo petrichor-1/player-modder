@@ -4,7 +4,7 @@
   "description": "Hopscotch player modding",
   "main": "index.js",
   "scripts": {
-    "test": "index.js webplayers/2.2.0/webplayer.min.js mod.js"
+    "test": "index.js webplayers/2.2.0/webplayer.min.js modded.js"
   },
   "author": "",
   "license": "ISC"
