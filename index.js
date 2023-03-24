@@ -127,6 +127,12 @@ function replaceLinePropertiesParserComputedColorString(unmoddedPlayer) {
 	);
 }
 
+function replaceHSTextCalculatorComputedValue(unmoddedPlayer) {
+	return replaceDefault(unmoddedPlayer,"computedValue",5,old =>
+		`default:return executeModdedParameter.apply(this,[()=>{$1},${old.parameterNames[0]},[${old.parameterNames[1]},${old.parameterNames[2]},${old.parameterNames[3]}],null])`
+	);
+}
+
 function applyModOrWriteFile(moddedPlayer,amountOfModsApplied) {
 	if (modPaths.length > amountOfModsApplied) {
 		fs.readFile(modPaths[amountOfModsApplied],(error, f) => {
@@ -158,9 +164,10 @@ fs.readFile(unmoddedPlayerPath, (error, f) => {
 			replaceHSConditionalCalculatorComputedBooleanValue(
 			replaceHSTraitCalculatorComputedValue(
 			replaceLinePropertiesParserComputedColorString(
+			replaceHSTextCalculatorComputedValue(
 			replaceTraitCheck(
 				unmoddedPlayer
-		)))))));
+		))))))));
 		applyModOrWriteFile(moddedPlayer,0);
 	});
 });
