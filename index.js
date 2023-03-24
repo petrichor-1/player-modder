@@ -106,8 +106,19 @@ function replaceHSStageParameterBlockTypeOfCalculation(unmoddedPlayer) {
 
 function replaceHSConditionalCalculatorComputedBooleanValue(unmoddedPlayer) {
 	return replaceDefault(unmoddedPlayer,"computedBooleanValue",4,old =>
-		`default:return executeModdedParameter(()=>{$1},${old.parameterNames[0]},[${old.parameterNames[1]},${old.parameterNames[2]}],${old.parameterNames[3]})`
+		`default:return executeModdedParameter.apply(this,[()=>{$1},${old.parameterNames[0]},[${old.parameterNames[1]},${old.parameterNames[2]}],${old.parameterNames[3]}])`
 	);
+}
+
+function replaceHSTraitCalculatorComputedValue(unmoddedPlayer) {
+	return replaceDefault(unmoddedPlayer,"computedValue",3,old =>
+		`default:return executeModdedParameter.apply(this,[()=>{$1},${old.parameterNames[0]},null,${old.parameterNames[1]}])`
+	);
+}
+
+function replaceTraitCheck(unmoddedPlayer) {
+	return unmoddedPlayer.replace(/this\.type>=([a-z])\.HSBlockType\.TraitRotation&&this\.type<([a-z])\.HSBlockType.HS_END_OF_OBJECT_TRAITS/g,
+	 "(this.type >= $1.HSBlockType.TraitRotation && this.type < $1.HSBlockType.HS_END_OF_OBJECT_TRAITS) || (this.type<0&&MODDED_PARAMETER_CALCULATION_TYPES[this.type]==PetrichorParameterType.trait)");
 }
 
 function applyModOrWriteFile(moddedPlayer,amountOfModsApplied) {
@@ -135,7 +146,14 @@ fs.readFile(unmoddedPlayerPath, (error, f) => {
 		if (error)
 			return console.error(error);
 		let moddedPlayer = f.toString();
-		moddedPlayer += "\n"+replaceHSExecutableExecuteBlock(replaceHSMathCalculatorComputedValue(replaceHSStageParameterBlockTypeOfCalculation(replaceHSConditionalCalculatorComputedBooleanValue(unmoddedPlayer))));
+		moddedPlayer += "\n"+replaceHSExecutableExecuteBlock(
+			replaceHSMathCalculatorComputedValue(
+			replaceHSStageParameterBlockTypeOfCalculation(
+			replaceHSConditionalCalculatorComputedBooleanValue(
+			replaceHSTraitCalculatorComputedValue(
+			replaceTraitCheck(
+				unmoddedPlayer
+			))))));
 		applyModOrWriteFile(moddedPlayer,0);
 	});
 });
