@@ -11,6 +11,15 @@ for (let i = 4; i < process.argv.length; i++) {
 	modPaths.push(path);
 }
 
+function regexForMethod(name,parameterCount) {
+	let regexString = `[a-z]\\.prototype\\.${name}=function\\(`;
+	for (let i = 0; i < parameterCount; i++) {
+		regexString += "[a-z]" + (i<parameterCount-1 ? "," : "");
+	}
+	regexString += "\\)";
+	return new RegExp(regexString,"g");
+}
+
 function extractFunction(string,startIndex) {
 	const result = {};
 	// Find parameter names. Does not work for functions without ( before parameters.
@@ -61,7 +70,7 @@ function extractFunction(string,startIndex) {
 }
 
 function replaceHSExecutableExecuteBlock(unmoddedPlayer) {
-	const regex = /[a-z]\.prototype\.executeBlock=function\([a-z],[a-z]\)/g
+	const regex = regexForMethod("executeBlock",2);
 	let hasFoundMatch = false;
 	while (match = regex.exec(unmoddedPlayer)) {
 		if (hasFoundMatch)
@@ -79,7 +88,7 @@ function replaceHSExecutableExecuteBlock(unmoddedPlayer) {
 }
 
 function replaceHSMathCalculatorComputedValue(unmoddedPlayer) {
-	const regex = /[a-z]\.prototype\.computedValue=function\([a-z],[a-z]\)/g
+	const regex = regexForMethod("computedValue",2);
 	let hasFoundMatch = false;
 	while (match = regex.exec(unmoddedPlayer)) {
 		if (hasFoundMatch)
@@ -99,7 +108,7 @@ function replaceHSMathCalculatorComputedValue(unmoddedPlayer) {
 }
 
 function replaceHSStageParameterBlockTypeOfCalculation(unmoddedPlayer) {
-	const regex = /[a-z]\.prototype\.typeOfCalculation=function\(\)/g
+	const regex = regexForMethod("typeOfCalculation",0);
 	let hasFoundMatch = false;
 	while (match = regex.exec(unmoddedPlayer)) {
 		if (hasFoundMatch)
