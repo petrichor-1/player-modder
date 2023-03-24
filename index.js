@@ -88,13 +88,13 @@ function replaceDefault(unmoddedPlayer,methodName,methodParameterCount,replacer)
 
 function replaceHSExecutableExecuteBlock(unmoddedPlayer) {
 	return replaceDefault(unmoddedPlayer,"executeBlock",2,oldExecuteBlocks =>
-		`default:executeModdedMethod((${oldExecuteBlocks.parameterNames[1]})=>{$1},${oldExecuteBlocks.parameterNames[0]},${oldExecuteBlocks.parameterNames[1]});`
+		`default:executeModdedMethod.apply(this,[(${oldExecuteBlocks.parameterNames[0]},${oldExecuteBlocks.parameterNames[1]})=>{$1},${oldExecuteBlocks.parameterNames[0]},${oldExecuteBlocks.parameterNames[1]}]);`
 	);
 }
 
 function replaceHSMathCalculatorComputedValue(unmoddedPlayer) {
 	return replaceDefault(unmoddedPlayer,"computedValue",2,oldComputedValue =>
-		`default:return executeModdedParameter(()=>{$1},${oldComputedValue.parameterNames[0]},${oldComputedValue.parameterNames[1]});`
+		`default:return executeModdedParameter.apply(this,[()=>{$1},${oldComputedValue.parameterNames[0]},${oldComputedValue.parameterNames[1]}]);`
 	);
 }
 

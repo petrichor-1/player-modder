@@ -18,12 +18,12 @@ const MODDED_PARAMETER_CALCULATION_TYPES = {};
 function executeModdedMethod(defaultCallback,stageMethod,t) {
 	if (stageMethod.type < 0) {
 		if (MODDED_METHOD_BLOCKS[stageMethod.type]) {
-			MODDED_METHOD_BLOCKS[stageMethod.type](stageMethod,t);
+			MODDED_METHOD_BLOCKS[stageMethod.type].apply(this,[stageMethod,t]);
 		} else {
 			console.error(`Attempting to execute unknown modded block with id ${stageMethod.type}`,stageMethod)
 		}
 	} else {
-		defaultCallback(t);
+		defaultCallback.apply(this,[stageMethod,t]);
 	}
 }
 
