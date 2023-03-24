@@ -20,7 +20,7 @@ function executeModdedMethod(defaultCallback,stageMethod,t) {
 		if (MODDED_METHOD_BLOCKS[stageMethod.type]) {
 			MODDED_METHOD_BLOCKS[stageMethod.type].apply(this,[stageMethod,t]);
 		} else {
-			console.error(`Attempting to execute unknown modded block with id ${stageMethod.type}`,stageMethod)
+			console.error(`Attempted to execute unknown modded block with id ${stageMethod.type}`,stageMethod)
 		}
 	} else {
 		defaultCallback.apply(this,[stageMethod,t]);
@@ -30,12 +30,16 @@ function executeModdedMethod(defaultCallback,stageMethod,t) {
 function typeOfCalculationForModdedBlock(defaultCallback) {
 	if (this.type >= 0)
 		return defaultCallback();
-	return MODDED_PARAMETER_CALCULATION_TYPES[this.type];
+	return MODDED_PARAMETER_CALCULATION_TYPES[this.type] || defaultCallback();
 }
 
 function executeModdedParameter(defaultCallback,type,parameters,object) {
 	if (type >= 0)
-	return defaultCallback();
+		return defaultCallback();
+	if (!MODDED_PARAMETER_BLOCKS[type]) {
+		console.error(`Attempted to execute unknown modded block with id ${type}`);
+		return defaultCallback();
+	}
 	// object is only defined on booleans
 	return MODDED_PARAMETER_BLOCKS[type].apply(this,[parameters,object]);
 }
