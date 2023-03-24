@@ -1,37 +1,23 @@
+const RESERVED_INVALID_USER_ID = 2;
 const PETRICHOR_CURRENT_MOD_CONFIG = {
-	userId: 2,
+	userId: RESERVED_INVALID_USER_ID,
 	modId: 0,
 	modName: "UNCONFIGURED MOD"
 }
 const MODDED_METHOD_BLOCKS = {}
 const MODDED_PARAMETER_BLOCKS = {}
 function executeModdedMethod(defaultCallback,stageMethod,t) {
-	console.log(`Possibly executing modded block with id ${stageMethod.type}`)
-	if (MODDED_METHOD_BLOCKS[stageMethod.type]) {
-		MODDED_METHOD_BLOCKS[stageMethod.type](stageMethod,t);
+	if (stageMethod.type < 0) {
+		if (MODDED_METHOD_BLOCKS[stageMethod.type]) {
+			MODDED_METHOD_BLOCKS[stageMethod.type](stageMethod,t);
+		} else {
+			console.error(`Attempting to execute unknown modded block with id ${stageMethod.type}`,stageMethod)
+		}
 	} else {
 		defaultCallback(t);
 	}
 }
-//Set up modder
-{
-	const oldExecuteBlocks = HSExecutable.prototype.executeBlock.toString();
-	const newExecuteBlocks = oldExecuteBlocks.replace(/default:([^}]+)/,"default:executeModdedMethod((t)=>{$1},e,t);")
-		.replace(/.\.HS/g,"HS");
-	const spl = newExecuteBlocks.split("{");
-	const def = spl.shift();
-	let body = spl.join("{");
-	body = body.substr(0,body.length-1);
-	const firstParam = def.split(",")[0].split("(")[1];
-	const secondParam = def.split(",")[1].split(")")[0];
-	console.log(firstParam,secondParam,body)
-	HSExecutable.prototype.executeBlock = Function(firstParam, secondParam, body);
-}
-{
-	//TODO: Parameter blocks
-}
 
-//Modding functions
 function setModConfig(config) {
 	if (config.userId < 0 || config.userId == 2) {
 		return console.error("Bad user id, must be greater than 0 and must not equal 2");
