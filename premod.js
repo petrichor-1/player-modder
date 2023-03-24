@@ -28,7 +28,6 @@ function executeModdedMethod(defaultCallback,stageMethod,t) {
 }
 
 function typeOfCalculationForModdedBlock(defaultCallback) {
-	console.log(this);
 	if (this.type >= 0)
 		return defaultCallback();
 	return MODDED_PARAMETER_CALCULATION_TYPES[this.type];
@@ -37,7 +36,7 @@ function typeOfCalculationForModdedBlock(defaultCallback) {
 function executeModdedParameter(defaultCallback,type,parameters) {
 	if (type >= 0)
 		return defaultCallback();
-	return MODDED_PARAMETER_BLOCKS[type](parameters);
+	return MODDED_PARAMETER_BLOCKS[type].apply(this,[parameters]);
 }
 
 function setModConfig(config) {
