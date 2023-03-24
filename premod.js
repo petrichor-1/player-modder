@@ -54,13 +54,6 @@ function setModConfig(config) {
 	PETRICHOR_CURRENT_MOD_CONFIG.addedBlockNames = [];
 }
 function newBlock(blockConfig) {
-	// {
-	// 	id: 0,
-	// 	name: "TestBlock",
-	// 	method: (params) => {
-	// 		console.log(params);
-	// 	}
-	// }
 	if (PETRICHOR_CURRENT_MOD_CONFIG.userId == 2)
 		throw "Cannot add new block because mod is not configured.";
 
