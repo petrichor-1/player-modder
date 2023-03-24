@@ -1,0 +1,11 @@
+{
+  "name": "player-modder",
+  "version": "1.0.0",
+  "description": "Hopscotch player modding",
+  "main": "index.js",
+  "scripts": {
+    "test": "index.js webplayers/2.2.0/webplayer.min.js mod.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
