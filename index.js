@@ -69,59 +69,39 @@ function extractFunction(string,startIndex) {
 	return result;
 }
 
-function replaceHSExecutableExecuteBlock(unmoddedPlayer) {
-	const regex = regexForMethod("executeBlock",2);
+function replaceDefault(unmoddedPlayer,methodName,methodParameterCount,replacer) {
+	const regex = regexForMethod(methodName,methodParameterCount);
 	let hasFoundMatch = false;
 	while (match = regex.exec(unmoddedPlayer)) {
 		if (hasFoundMatch)
-			throw "Found multiple matches for executeBlock when trying to modify HSExecutable.prototype.executeBlock"
+			throw `Found multiple matches for ${methodName}`;
 		hasFoundMatch = true;
-		const oldExecuteBlocks = extractFunction(unmoddedPlayer,match.index+"e.prototype.executeBlock=".length);
-		const newBody = oldExecuteBlocks.body
-			.replace(/default:([^}]+)/,`default:executeModdedMethod((${oldExecuteBlocks.parameterNames[1]})=>{$1},${oldExecuteBlocks.parameterNames[0]},${oldExecuteBlocks.parameterNames[1]});`)
-			.replace(/.\.HS/g,"HS");
-		return unmoddedPlayer.substr(0,oldExecuteBlocks.bodyStartIndex)+newBody+unmoddedPlayer.substr(oldExecuteBlocks.bodyEndIndex,unmoddedPlayer.length);
+		const oldMethod = extractFunction(unmoddedPlayer,match.index+`e.prototype.${methodName}=`.length);
+		const newBody = oldMethod.body
+			.replace(/default:([^}]+)/,replacer(oldMethod))
+		return unmoddedPlayer.substr(0,oldMethod.bodyStartIndex)+newBody+unmoddedPlayer.substr(oldMethod.bodyEndIndex,unmoddedPlayer.length);
 	}
 	if (!hasFoundMatch) {
-		throw "Could not find HSExecutable.prototype.executeBlock";
+		throw `Could not find ${methodName}`;
 	}
+}
+
+function replaceHSExecutableExecuteBlock(unmoddedPlayer) {
+	return replaceDefault(unmoddedPlayer,"executeBlock",2,oldExecuteBlocks =>
+		`default:executeModdedMethod((${oldExecuteBlocks.parameterNames[1]})=>{$1},${oldExecuteBlocks.parameterNames[0]},${oldExecuteBlocks.parameterNames[1]});`
+	);
 }
 
 function replaceHSMathCalculatorComputedValue(unmoddedPlayer) {
-	const regex = regexForMethod("computedValue",2);
-	let hasFoundMatch = false;
-	while (match = regex.exec(unmoddedPlayer)) {
-		if (hasFoundMatch)
-			throw "Found multiple matches for computedValue when trying to modify HSMathCalculator.prototype.computedValue"
-		hasFoundMatch = true;
-		const oldComputedValue = extractFunction(unmoddedPlayer,match.index+"e.prototype.computedValue=".length);
-		//TODO: I think the first thing computedValue does is parse the
-		//      parameters as numbers. Should those values be used?
-		const newBody = oldComputedValue.body
-			.replace(/default:([^}]+)/,`default:return executeModdedParameter(()=>{$1},${oldComputedValue.parameterNames[0]},${oldComputedValue.parameterNames[1]});`)
-			.replace(/.\.HS/g,"HS");
-		return unmoddedPlayer.substr(0,oldComputedValue.bodyStartIndex)+newBody+unmoddedPlayer.substr(oldComputedValue.bodyEndIndex,unmoddedPlayer.length);
-	}
-	if (!hasFoundMatch) {
-		throw "Could not find HSMathCalculator.prototype.computedValue";
-	}
+	return replaceDefault(unmoddedPlayer,"computedValue",2,oldComputedValue =>
+		`default:return executeModdedParameter(()=>{$1},${oldComputedValue.parameterNames[0]},${oldComputedValue.parameterNames[1]});`
+	);
 }
 
 function replaceHSStageParameterBlockTypeOfCalculation(unmoddedPlayer) {
-	const regex = regexForMethod("typeOfCalculation",0);
-	let hasFoundMatch = false;
-	while (match = regex.exec(unmoddedPlayer)) {
-		if (hasFoundMatch)
-			throw "Found multiple matches for typeOfCalculation when trying to modify HSStageParameterBlock.prototype.typeOfCalculation"
-		hasFoundMatch = true;
-		const oldTypeOfCalculation = extractFunction(unmoddedPlayer,match.index+"e.prototype.typeOfCalculation=".length);
-		const newBody = oldTypeOfCalculation.body
-			.replace(/default:([^}]+)/,`default:return typeOfCalculationForModdedBlock.apply(this,[()=>{$1}]);`)
-		return unmoddedPlayer.substr(0,oldTypeOfCalculation.bodyStartIndex)+newBody+unmoddedPlayer.substr(oldTypeOfCalculation.bodyEndIndex,unmoddedPlayer.length);
-	}
-	if (!hasFoundMatch) {
-		throw "Could not find HSStageParameterBlock.prototype.typeOfCalculation";
-	}
+	return replaceDefault(unmoddedPlayer,"typeOfCalculation",0,old =>
+		`default:return typeOfCalculationForModdedBlock.apply(this,[()=>{$1}]);`
+	);
 }
 
 function applyModOrWriteFile(moddedPlayer,amountOfModsApplied) {
