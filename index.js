@@ -69,21 +69,27 @@ function extractFunction(string,startIndex) {
 	return result;
 }
 
-function replaceDefault(unmoddedPlayer,methodName,methodParameterCount,replacer) {
+function extractNamedFunction(unmoddedPlayer,methodName,methodParameterCount) {
 	const regex = regexForMethod(methodName,methodParameterCount);
 	let hasFoundMatch = false;
+	let result;
 	while (match = regex.exec(unmoddedPlayer)) {
 		if (hasFoundMatch)
 			throw `Found multiple matches for ${methodName}`;
 		hasFoundMatch = true;
-		const oldMethod = extractFunction(unmoddedPlayer,match.index+`e.prototype.${methodName}=`.length);
-		const newBody = oldMethod.body
-			.replace(/default:([^}]+)/,replacer(oldMethod))
-		return unmoddedPlayer.substr(0,oldMethod.bodyStartIndex)+newBody+unmoddedPlayer.substr(oldMethod.bodyEndIndex,unmoddedPlayer.length);
+		result = extractFunction(unmoddedPlayer,match.index+`e.prototype.${methodName}=`.length);
 	}
 	if (!hasFoundMatch) {
 		throw `Could not find ${methodName}`;
 	}
+	return result;
+}
+
+function replaceDefault(unmoddedPlayer,methodName,methodParameterCount,replacer) {
+	const oldMethod = extractNamedFunction(unmoddedPlayer,methodName,methodParameterCount);
+	const newBody = oldMethod.body
+		.replace(/default:([^}]+)/,replacer(oldMethod))
+	return unmoddedPlayer.substr(0,oldMethod.bodyStartIndex)+newBody+unmoddedPlayer.substr(oldMethod.bodyEndIndex,unmoddedPlayer.length);
 }
 
 function replaceHSExecutableExecuteBlock(unmoddedPlayer) {
